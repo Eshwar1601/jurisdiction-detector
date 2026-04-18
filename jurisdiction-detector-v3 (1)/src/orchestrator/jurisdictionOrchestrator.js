@@ -7,8 +7,14 @@ const { normalizeOutput }       = require("../normalizer/outputNormalizer");
 const { applyTaxFilter }        = require("../taxFilter/taxFilter");
 
 function extractStateAbbr(standardizedAddress) {
-  const match = standardizedAddress?.match(/,\s*([A-Z]{2})\s+\d{5}/);
-  return match ? match[1] : null;
+  if (!standardizedAddress) return null;
+  const match1 = standardizedAddress.match(/,\s*([A-Z]{2})\s+\d{5}/);
+  if (match1) return match1[1];
+  const match2 = standardizedAddress.match(/,\s*([A-Z]{2})\s*$/);
+  if (match2) return match2[1];
+  const match3 = standardizedAddress.match(/\b([A-Z]{2})\b/g);
+  if (match3) return match3[match3.length - 1];
+  return null;
 }
 
 async function detectJurisdiction(rawAddress, options = {}) {
