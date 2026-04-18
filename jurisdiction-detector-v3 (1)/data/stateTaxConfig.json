@@ -1,0 +1,359 @@
+{
+  "AL": {
+    "name": "Alabama",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city", "county"],
+    "notes": "Birmingham, Gadsden, and other cities levy local income tax"
+  },
+  "AK": {
+    "name": "Alaska",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No state or local income tax"
+  },
+  "AZ": {
+    "name": "Arizona",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "AR": {
+    "name": "Arkansas",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "CA": {
+    "name": "California",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "SDI (State Disability Insurance) applies at state level only"
+  },
+  "CO": {
+    "name": "Colorado",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city", "county"],
+    "notes": "Denver, Aurora, and other cities levy occupational privilege tax (OPT)"
+  },
+  "CT": {
+    "name": "Connecticut",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "DE": {
+    "name": "Delaware",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city"],
+    "notes": "Wilmington levies a city wage tax"
+  },
+  "FL": {
+    "name": "Florida",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": [],
+    "notes": "No state or local income tax"
+  },
+  "GA": {
+    "name": "Georgia",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "HI": {
+    "name": "Hawaii",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "ID": {
+    "name": "Idaho",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "IL": {
+    "name": "Illinois",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "Chicago has no separate income tax despite local wages"
+  },
+  "IN": {
+    "name": "Indiana",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "county"],
+    "notes": "All 92 counties levy county income tax (CAGIT/COIT)"
+  },
+  "IA": {
+    "name": "Iowa",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "school_district"],
+    "notes": "School district surtax applies in some districts"
+  },
+  "KS": {
+    "name": "Kansas",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "KY": {
+    "name": "Kentucky",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city", "county", "school_district"],
+    "notes": "Occupational license tax by city and county. School district tax also applies"
+  },
+  "LA": {
+    "name": "Louisiana",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "ME": {
+    "name": "Maine",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "MD": {
+    "name": "Maryland",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "county"],
+    "notes": "All counties + Baltimore City levy local income tax (1.75%–3.2%)"
+  },
+  "MA": {
+    "name": "Massachusetts",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "MI": {
+    "name": "Michigan",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city"],
+    "notes": "Detroit, Grand Rapids, Lansing, and ~20 cities levy city income tax"
+  },
+  "MN": {
+    "name": "Minnesota",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "MS": {
+    "name": "Mississippi",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "MO": {
+    "name": "Missouri",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city"],
+    "notes": "St. Louis and Kansas City levy earnings tax (1%)"
+  },
+  "MT": {
+    "name": "Montana",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "NE": {
+    "name": "Nebraska",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "NV": {
+    "name": "Nevada",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": [],
+    "notes": "No state or local income tax"
+  },
+  "NH": {
+    "name": "New Hampshire",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": [],
+    "notes": "No wage income tax (interest/dividends tax being phased out)"
+  },
+  "NJ": {
+    "name": "New Jersey",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "Newark has a payroll tax but no general local income tax statewide"
+  },
+  "NM": {
+    "name": "New Mexico",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "NY": {
+    "name": "New York",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city", "county"],
+    "notes": "NYC has city income tax. Yonkers has surcharge. NYC residents pay both city + state"
+  },
+  "NC": {
+    "name": "North Carolina",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "ND": {
+    "name": "North Dakota",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "OH": {
+    "name": "Ohio",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city", "township", "school_district"],
+    "notes": "Most cities and townships levy RITA or CCA municipal income tax. School district tax (SDIT) also applies"
+  },
+  "OK": {
+    "name": "Oklahoma",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "OR": {
+    "name": "Oregon",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city", "county"],
+    "notes": "Portland Metro and Multnomah County have local taxes. Statewide transit tax also applies"
+  },
+  "PA": {
+    "name": "Pennsylvania",
+    "state_income_tax": true,
+    "local_income_tax": true,
+    "applicable_levels": ["state", "city", "municipality", "school_district"],
+    "notes": "Every municipality levies Earned Income Tax (EIT). School district also levies EIT. Use both resident and work municipality rates"
+  },
+  "RI": {
+    "name": "Rhode Island",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "SC": {
+    "name": "South Carolina",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "SD": {
+    "name": "South Dakota",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": [],
+    "notes": "No state or local income tax"
+  },
+  "TN": {
+    "name": "Tennessee",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": [],
+    "notes": "No income tax (Hall Tax on dividends/interest repealed 2021)"
+  },
+  "TX": {
+    "name": "Texas",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": [],
+    "notes": "No state or local income tax"
+  },
+  "UT": {
+    "name": "Utah",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "VT": {
+    "name": "Vermont",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "VA": {
+    "name": "Virginia",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "WA": {
+    "name": "Washington",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": [],
+    "notes": "No income tax. Capital gains tax introduced 2023 at state level only"
+  },
+  "WV": {
+    "name": "West Virginia",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "WI": {
+    "name": "Wisconsin",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "No local income tax"
+  },
+  "WY": {
+    "name": "Wyoming",
+    "state_income_tax": false,
+    "local_income_tax": false,
+    "applicable_levels": [],
+    "notes": "No state or local income tax"
+  },
+  "DC": {
+    "name": "District of Columbia",
+    "state_income_tax": true,
+    "local_income_tax": false,
+    "applicable_levels": ["state"],
+    "notes": "DC taxes as a state equivalent. No separate local level"
+  }
+}

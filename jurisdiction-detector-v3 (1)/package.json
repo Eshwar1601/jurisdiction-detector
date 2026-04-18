@@ -1,0 +1,14 @@
+{
+  "name": "jurisdiction-detector",
+  "version": "1.0.0",
+  "description": "US Address → Full Jurisdiction Detector (Free APIs only)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node tests/testAddresses.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.18.0"
+  }
+}

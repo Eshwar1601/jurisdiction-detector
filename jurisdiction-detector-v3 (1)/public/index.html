@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jurisdiction Detector</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0f1117;
+    --surface:   #1a1d27;
+    --surface2:  #222636;
+    --border:    #2e3347;
+    --border2:   #3d4260;
+    --text:      #e8eaf0;
+    --muted:     #7b82a0;
+    --accent:    #4f8ef7;
+    --accent2:   #6fa3ff;
+    --green:     #3ecf8e;
+    --amber:     #f5a623;
+    --red:       #f46b6b;
+    --purple:    #a78bfa;
+    --teal:      #2dd4bf;
+    --radius:    10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  /* Header */
+  .header { margin-bottom: 2.5rem; }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(79,142,247,0.12); border: 1px solid rgba(79,142,247,0.3);
+    color: var(--accent2); font-size: 11px; letter-spacing: 0.08em;
+    padding: 4px 10px; border-radius: 20px; text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); margin-top: 6px; font-size: 13px; font-family: -apple-system, sans-serif; }
+
+  /* Input card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .input-grid { grid-template-columns: 1fr; } }
+
+  .input-group { display: flex; flex-direction: column; gap: 8px; }
+  .input-label {
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); display: flex; align-items: center; gap: 6px;
+  }
+  .label-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .label-dot.home { background: var(--green); }
+  .label-dot.work { background: var(--accent); }
+
+  input[type="text"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px 14px;
+    width: 100%;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  .detect-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 1rem;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 12px; cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .detect-btn:hover { background: var(--accent2); }
+  .detect-btn:active { transform: scale(0.99); }
+  .detect-btn:disabled { background: var(--border2); color: var(--muted); cursor: not-allowed; transform: none; }
+
+  /* Spinner */
+  .spinner {
+    width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-box {
+    background: rgba(244,107,107,0.1); border: 1px solid rgba(244,107,107,0.3);
+    border-radius: var(--radius-sm); padding: 12px 16px;
+    color: var(--red); font-size: 13px; margin-bottom: 1rem;
+    font-family: -apple-system, sans-serif;
+  }
+
+  /* Results */
+  .results-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .results-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .detection-time { font-size: 11px; color: var(--muted); }
+
+  .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .results-grid { grid-template-columns: 1fr; } }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .result-card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .result-card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 6px; }
+  .addr-text { font-size: 11px; color: var(--muted); font-family: -apple-system, sans-serif; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Tax chain */
+  .tax-chain {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .chain-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-right: 4px; }
+  .chain-item {
+    background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.25);
+    color: var(--accent2); font-size: 10px; padding: 3px 8px;
+    border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .chain-arrow { color: var(--border2); font-size: 10px; }
+  .no-tax-badge {
+    background: rgba(244,107,107,0.1); border: 1px solid rgba(244,107,107,0.25);
+    color: var(--red); font-size: 10px; padding: 3px 8px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* Jurisdiction list */
+  .jurisdiction-list { padding: 8px 0; }
+  .jurisdiction-row {
+    display: flex; align-items: center;
+    padding: 8px 16px; gap: 12px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .jurisdiction-row:last-child { border-bottom: none; }
+  .jurisdiction-row:hover { background: var(--surface2); }
+
+  .j-level {
+    font-size: 10px; color: var(--muted); min-width: 16px; text-align: right;
+  }
+  .j-type-badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    min-width: 100px; text-align: center;
+    font-weight: 600;
+  }
+  .j-name { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text); flex: 1; }
+  .j-id { font-size: 10px; color: var(--muted); }
+  .j-source { font-size: 10px; color: var(--muted); }
+
+  /* Type colors */
+  .type-state           { background: rgba(167,139,250,0.12); color: var(--purple);  border: 1px solid rgba(167,139,250,0.25); }
+  .type-county          { background: rgba(245,166,35,0.12);  color: var(--amber);   border: 1px solid rgba(245,166,35,0.25); }
+  .type-city,
+  .type-town,
+  .type-village         { background: rgba(79,142,247,0.12);  color: var(--accent2); border: 1px solid rgba(79,142,247,0.25); }
+  .type-municipality    { background: rgba(79,142,247,0.08);  color: var(--accent);  border: 1px solid rgba(79,142,247,0.2); }
+  .type-borough         { background: rgba(62,207,142,0.1);   color: var(--green);   border: 1px solid rgba(62,207,142,0.25); }
+  .type-township        { background: rgba(45,212,191,0.1);   color: var(--teal);    border: 1px solid rgba(45,212,191,0.25); }
+  .type-suburb          { background: rgba(45,212,191,0.06);  color: var(--teal);    border: 1px solid rgba(45,212,191,0.2); }
+  .type-school_district { background: rgba(62,207,142,0.12);  color: var(--green);   border: 1px solid rgba(62,207,142,0.3); }
+  .type-special_district{ background: rgba(244,107,107,0.1);  color: var(--red);     border: 1px solid rgba(244,107,107,0.25); }
+
+  /* Tax filter section */
+  .tax-section {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .tax-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px; }
+  .tax-jurisdiction-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 0; font-family: -apple-system, sans-serif; font-size: 12px;
+  }
+  .tax-check { color: var(--green); font-size: 12px; }
+  .tax-name { color: var(--text); }
+  .tax-type-label { color: var(--muted); font-size: 11px; }
+
+  /* Meta row */
+  .meta-row {
+    padding: 8px 16px; border-top: 1px solid var(--border);
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-key { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .meta-val { font-size: 12px; color: var(--text); }
+
+  /* State notes */
+  .state-notes {
+    padding: 8px 16px 10px;
+    border-top: 1px solid var(--border);
+    font-family: -apple-system, sans-serif;
+    font-size: 11px; color: var(--muted); line-height: 1.5;
+  }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 3rem; color: var(--muted); font-family: -apple-system, sans-serif; }
+  .empty-icon { font-size: 32px; margin-bottom: 1rem; opacity: 0.4; }
+
+  /* Hidden */
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-badge"><span class="dot"></span> Free APIs · No Key Required</div>
+    <h1>Jurisdiction <span>Detector</span></h1>
+    <p class="subtitle">Enter home and work addresses to detect all applicable tax jurisdictions</p>
+  </div>
+
+  <div class="card">
+    <div class="input-grid">
+      <div class="input-group">
+        <label class="input-label">
+          <span class="label-dot home"></span> Home Address
+        </label>
+        <input type="text" id="homeAddr" placeholder="e.g. 1234 Walnut St, Philadelphia, PA 19107" />
+      </div>
+      <div class="input-group">
+        <label class="input-label">
+          <span class="label-dot work"></span> Work Address
+        </label>
+        <input type="text" id="workAddr" placeholder="e.g. 600 Grant St, Pittsburgh, PA 15219" />
+      </div>
+    </div>
+    <button class="detect-btn" id="detectBtn" onclick="detect()">
+      <span id="btnText">DETECT JURISDICTIONS</span>
+    </button>
+  </div>
+
+  <div id="errorBox" class="error-box hidden"></div>
+
+  <div id="resultsSection" class="hidden">
+    <div class="results-header">
+      <span class="results-title">Detection Results</span>
+      <span class="detection-time" id="detectionTime"></span>
+    </div>
+    <div class="results-grid">
+      <div id="homeResult"></div>
+      <div id="workResult"></div>
+    </div>
+  </div>
+
+  <div id="emptyState" class="empty">
+    <div class="empty-icon">◎</div>
+    <div>Enter addresses above to detect jurisdictions</div>
+  </div>
+
+</div>
+
+<script>
+async function detect() {
+  const home = document.getElementById('homeAddr').value.trim();
+  const work = document.getElementById('workAddr').value.trim();
+  const btn  = document.getElementById('detectBtn');
+  const err  = document.getElementById('errorBox');
+
+  err.classList.add('hidden');
+
+  if (!home || !work) {
+    showError('Please enter both home and work addresses.');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const res = await fetch('/detect/batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ home, work })
+    });
+
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+
+    renderResults(json.data);
+  } catch (e) {
+    showError(e.message || 'Detection failed. Make sure the server is running.');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function renderResults(data) {
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('resultsSection').classList.remove('hidden');
+
+  const t = Math.max(data.home.meta?.detection_ms || 0, data.work.meta?.detection_ms || 0);
+  document.getElementById('detectionTime').textContent = `Detected in ~${t}ms`;
+
+  document.getElementById('homeResult').innerHTML = buildResultCard(data.home, 'HOME');
+  document.getElementById('workResult').innerHTML = buildResultCard(data.work, 'WORK');
+}
+
+function buildResultCard(d, label) {
+  const color = label === 'HOME' ? '#3ecf8e' : '#4f8ef7';
+  const taxChain = (d.taxChain || []);
+  const taxJurisdictions = (d.taxJurisdictions || []);
+  const config = d.taxConfig || {};
+
+  const chainHtml = taxChain.length === 0
+    ? `<span class="no-tax-badge">NO INCOME TAX</span>`
+    : taxChain.map((c, i) =>
+        `<span class="chain-item">${c}</span>${i < taxChain.length - 1 ? '<span class="chain-arrow">→</span>' : ''}`
+      ).join('');
+
+  const jurisdictionRows = (d.jurisdictions || []).map(j => `
+    <div class="jurisdiction-row">
+      <span class="j-level">${j.level}</span>
+      <span class="j-type-badge type-${j.type}">${j.type.replace('_', ' ')}</span>
+      <span class="j-name">${j.name || '—'}</span>
+      <span class="j-id">${j.id || ''}</span>
+    </div>
+  `).join('');
+
+  const taxRows = taxJurisdictions.map(j => `
+    <div class="tax-jurisdiction-row">
+      <span class="tax-check">✓</span>
+      <span class="tax-name">${j.name}</span>
+      <span class="tax-type-label">${j.type}</span>
+    </div>
+  `).join('') || '<div style="color: var(--muted); font-size:12px; font-family:-apple-system,sans-serif">No local tax applicable</div>';
+
+  const meta = d.meta || {};
+
+  return `
+    <div class="result-card">
+      <div class="result-card-header">
+        <span class="result-card-title">
+          <span style="color:${color}">■</span> ${label}
+        </span>
+        <span class="addr-text" title="${d.standardized_address || ''}">${d.standardized_address || d.input_address}</span>
+      </div>
+
+      <div class="tax-chain">
+        <span class="chain-label">Chain</span>
+        ${chainHtml}
+      </div>
+
+      <div class="jurisdiction-list">
+        ${jurisdictionRows || '<div style="padding:12px 16px;color:var(--muted);font-size:12px">No jurisdictions detected</div>'}
+      </div>
+
+      <div class="tax-section">
+        <div class="tax-section-label">Tax-relevant jurisdictions</div>
+        ${taxRows}
+      </div>
+
+      ${config.notes ? `<div class="state-notes">${config.notes}</div>` : ''}
+
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-key">State</span>
+          <span class="meta-val">${d.state_abbr || '—'}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">ZIP</span>
+          <span class="meta-val">${meta.zip || '—'}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">Tract</span>
+          <span class="meta-val">${meta.census_tract ? meta.census_tract.slice(-6) : '—'}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">Coords</span>
+          <span class="meta-val">${d.coordinates ? d.coordinates.lat.toFixed(4)+', '+d.coordinates.lng.toFixed(4) : '—'}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = '⚠ ' + msg;
+  box.classList.remove('hidden');
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('detectBtn');
+  const txt = document.getElementById('btnText');
+  if (on) {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div><span>DETECTING...</span>';
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = '<span id="btnText">DETECT JURISDICTIONS</span>';
+  }
+}
+
+// Allow Enter key to trigger detection
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') detect();
+});
+</script>
+</body>
+</html>
