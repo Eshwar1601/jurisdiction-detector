@@ -10,8 +10,8 @@ let lastCallTime = 0;
 async function rateLimit() {
   const now = Date.now();
   const elapsed = now - lastCallTime;
-  if (elapsed < 1100) {
-    await new Promise((r) => setTimeout(r, 1100 - elapsed));
+  if (elapsed < 2000) {
+    await new Promise((r) => setTimeout(r, 2000 - elapsed));
   }
   lastCallTime = Date.now();
 }
@@ -30,7 +30,7 @@ async function detectCityMunicipality(lat, lng, stateAbbr) {
   const response = await axios.get(NOMINATIM_URL, {
     params,
     timeout: 8000,
-    headers: { "User-Agent": "jurisdiction-detector/1.0 (tax-engine-project)" },
+    headers: {    "User-Agent": "jurisdiction-detector/1.0 (tax-engine-project; contact@youremail.com)",   "Accept-Language": "en-US,en;q=0.9",   "Referer": "https://jurisdiction-detector.onrender.com" },
   });
 
   const addr = response.data?.address || {};
