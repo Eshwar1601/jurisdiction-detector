@@ -1,48 +1,97 @@
 const axios = require("axios");
 
-// NCES ArcGIS REST endpoint for unified school districts
-const NCES_URL =
-  "https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_SCHOOLDISTRICT_TL23_SY2223/MapServer/2/query";
+const NCES_URLS = [
+  "https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_SCHOOLDISTRICT_TL23_SY2223/MapServer/2/query",
+  "https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_SCHOOLDISTRICT_TL23_SY2223/MapServer/1/query",
+  "https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_SCHOOLDISTRICT_TL23_SY2223/MapServer/0/query",
+];
 
 async function detectSchoolDistrict(lat, lng) {
-  const params = {
-    geometry: `${lng},${lat}`,
-    geometryType: "esriGeometryPoint",
-    inSR: 4326,
-    spatialRel: "esriSpatialRelIntersects",
-    outFields: "*",
-    returnGeometry: false,
-    f: "json",
-  };
+  for (const url of NCES_URLS) {
+    try {
+      const params = {
+        geometry: `${lng},${lat}`,
+        geometryType: "esriGeometryPoint",
+        inSR: 4326,
+        spatialRel: "esriSpatialRelIntersects",
+        outFields: "*",
+        returnGeometry: false,
+        f: "json",
+      };
 
+      const response = await axios.get(url, { params, timeout: 15000 });
+      const features = response.data?.features;
+
+      if (!features || features.length === 0) continue;
+
+      const sd = features[0].attributes;
+      const sdName = sd.NAME || sd.SDNAME || sd.LEA_NAME || sd.DISTNAME || null;
+
+      if (!sdName) continue;
+
+      return {
+        level: 8,
+        type: "school_district",
+        name: toTitleCase(sdName),
+        id: sd.GEOID || sd.LEAID || null,
+        id_type: "nces",
+        source: "nces",
+        meta: {
+          sd_type: resolveSDType(sd.SDTYP, sd.LSAD),
+          grade_range: sd.LOGRADE && sd.HIGRADE
+            ? `${sd.LOGRADE}-${sd.HIGRADE}`
+            : null,
+        },
+      };
+    } catch (err) {
+      console.warn(`NCES URL failed (${url}):`, err.message);
+      continue;
+    }
+  }
+
+  // All NCES URLs failed — try Census Tiger as fallback
+  return await detectSDFromTiger(lat, lng);
+}
+
+async function detectSDFromTiger(lat, lng) {
   try {
-    const response = await axios.get(NCES_URL, { params, timeout: 10000 });
+    const url = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/School_Districts/MapServer/0/query";
+    const params = {
+      geometry: `${lng},${lat}`,
+      geometryType: "esriGeometryPoint",
+      inSR: 4326,
+      spatialRel: "esriSpatialRelIntersects",
+      outFields: "NAME,GEOID,SDTYP,LOGRADE,HIGRADE",
+      returnGeometry: false,
+      f: "json",
+    };
+
+    const response = await axios.get(url, { params, timeout: 15000 });
     const features = response.data?.features;
 
-    if (!features || features.length === 0) {
-      return nullJurisdiction(8, "school_district");
-    }
+    if (!features || features.length === 0) return nullJurisdiction(8, "school_district");
 
-const sd = features[0].attributes;
-console.log("NCES keys:", Object.keys(sd));
-const sdName = sd.NAME || sd.SDNAME || sd.LEA_NAME || null;
-if (!sdName) return nullJurisdiction(8, "school_district");
+    const sd = features[0].attributes;
+    const sdName = sd.NAME || null;
 
-return {
-  level: 8,
-  type: "school_district",
-  name: toTitleCase(sdName),
+    if (!sdName) return nullJurisdiction(8, "school_district");
+
+    return {
+      level: 8,
+      type: "school_district",
+      name: toTitleCase(sdName),
       id: sd.GEOID || null,
-      id_type: "nces",
-      source: "nces",
+      id_type: "fips",
+      source: "tiger",
       meta: {
-        sd_type: sdType,
-        grade_range: sd.LOGRADE && sd.HIGRADE ? `${sd.LOGRADE}-${sd.HIGRADE}` : null,
+        sd_type: resolveSDType(sd.SDTYP, null),
+        grade_range: sd.LOGRADE && sd.HIGRADE
+          ? `${sd.LOGRADE}-${sd.HIGRADE}`
+          : null,
       },
     };
   } catch (err) {
-    // NCES can be flaky — return null gracefully, don't crash
-    console.warn("NCES school district lookup failed:", err.message);
+    console.warn("Tiger SD fallback failed:", err.message);
     return nullJurisdiction(8, "school_district");
   }
 }
