@@ -10,7 +10,7 @@ async function detectSchoolDistrict(lat, lng) {
     geometryType: "esriGeometryPoint",
     inSR: 4326,
     spatialRel: "esriSpatialRelIntersects",
-    outFields: "GEOID,NAME,LSAD,LOGRADE,HIGRADE,SDTYP",
+    outFields: "*",
     returnGeometry: false,
     f: "json",
   };
@@ -23,13 +23,15 @@ async function detectSchoolDistrict(lat, lng) {
       return nullJurisdiction(8, "school_district");
     }
 
-    const sd = features[0].attributes;
-    const sdType = resolveSDType(sd.SDTYP, sd.LSAD);
+const sd = features[0].attributes;
+console.log("NCES keys:", Object.keys(sd));
+const sdName = sd.NAME || sd.SDNAME || sd.LEA_NAME || null;
+if (!sdName) return nullJurisdiction(8, "school_district");
 
-    return {
-      level: 8,
-      type: "school_district",
-      name: toTitleCase(sd.NAME),
+return {
+  level: 8,
+  type: "school_district",
+  name: toTitleCase(sdName),
       id: sd.GEOID || null,
       id_type: "nces",
       source: "nces",
