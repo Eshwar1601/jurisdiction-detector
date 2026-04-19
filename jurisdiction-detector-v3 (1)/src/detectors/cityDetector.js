@@ -2,16 +2,18 @@ const axios = require("axios");
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
 
-// States where township is a meaningful tax jurisdiction
-const TOWNSHIP_TAX_STATES = ["OH", "IN", "PA", "MI", "NJ", "IL", "MN", "WI", "ND", "SD", "NE", "KS"];
+const TOWNSHIP_TAX_STATES = [
+  "OH", "IN", "PA", "MI", "NJ", 
+  "IL", "MN", "WI", "ND", "SD", "NE", "KS"
+];
 
 let lastCallTime = 0;
 
 async function rateLimit() {
   const now = Date.now();
   const elapsed = now - lastCallTime;
-  if (elapsed < 2000) {
-    await new Promise((r) => setTimeout(r, 2000 - elapsed));
+  if (elapsed < 3000) {
+    await new Promise((r) => setTimeout(r, 3000 - elapsed));
   }
   lastCallTime = Date.now();
 }
@@ -27,77 +29,76 @@ async function detectCityMunicipality(lat, lng, stateAbbr) {
     zoom: 14,
   };
 
-  const response = await axios.get(NOMINATIM_URL, {
-    params,
-    timeout: 8000,
-    headers: {    "User-Agent": "jurisdiction-detector/1.0 (tax-engine-project; contact@youremail.com)",   "Accept-Language": "en-US,en;q=0.9",   "Referer": "https://jurisdiction-detector.onrender.com" },
-  });
+  try {
+    const response = await axios.get(NOMINATIM_URL, {
+      params,
+      timeout: 10000,
+      headers: {
+        "User-Agent": "JurisdictionDetector/1.0 (tax-engine; eshwar1601@github)",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://jurisdiction-detector.onrender.com",
+      },
+    });
 
-  const addr = response.data?.address || {};
+    const addr = response.data?.address || {};
 
-  // OSM uses different field names depending on settlement type
-  const city         = addr.city         || null;
-  const town         = addr.town         || null;
-  const village      = addr.village      || null;
-  const municipality = addr.municipality || null;
-  const suburb       = addr.suburb       || null;
-  const neighbourhood= addr.neighbourhood|| null;
-  const township     = addr.township     || null;
-  const borough      = addr.borough      || null;
-  const county       = addr.county       || null;
+    const city         = addr.city         || null;
+    const town         = addr.town         || null;
+    const village      = addr.village      || null;
+    const municipality = addr.municipality || null;
+    const suburb       = addr.suburb       || null;
+    const township     = addr.township     || null;
+    const borough      = addr.borough      || null;
 
-  // Resolve best city-level name (priority order)
-  const cityName = city || town || village || municipality || null;
+    const cityName = city || town || village || municipality || null;
+    const showTownship = stateAbbr && 
+      TOWNSHIP_TAX_STATES.includes(stateAbbr.toUpperCase());
 
-  // Township only relevant in certain states
-  const showTownship = stateAbbr && TOWNSHIP_TAX_STATES.includes(stateAbbr.toUpperCase());
+    return {
+      city: cityName ? {
+        level: 3,
+        type: city ? "city" : town ? "town" : 
+              village ? "village" : "municipality",
+        name: toTitleCase(cityName),
+        id: null, id_type: null, source: "nominatim",
+      } : nullJurisdiction(3, "city"),
 
-  return {
-    city: cityName ? {
-      level: 3,
-      type: city ? "city" : town ? "town" : village ? "village" : "municipality",
-      name: toTitleCase(cityName),
-      id: null,
-      id_type: null,
-      source: "nominatim",
-    } : nullJurisdiction(3, "city"),
+      municipality: municipality && municipality !== cityName ? {
+        level: 4, type: "municipality",
+        name: toTitleCase(municipality),
+        id: null, id_type: null, source: "nominatim",
+      } : nullJurisdiction(4, "municipality"),
 
-    municipality: municipality && municipality !== cityName ? {
-      level: 4,
-      type: "municipality",
-      name: toTitleCase(municipality),
-      id: null,
-      id_type: null,
-      source: "nominatim",
-    } : nullJurisdiction(4, "municipality"),
+      borough: borough ? {
+        level: 5, type: "borough",
+        name: toTitleCase(borough),
+        id: null, id_type: null, source: "nominatim",
+      } : nullJurisdiction(5, "borough"),
 
-    borough: borough ? {
-      level: 5,
-      type: "borough",
-      name: toTitleCase(borough),
-      id: null,
-      id_type: null,
-      source: "nominatim",
-    } : nullJurisdiction(5, "borough"),
+      township: showTownship && township ? {
+        level: 6, type: "township",
+        name: toTitleCase(township),
+        id: null, id_type: null, source: "nominatim",
+      } : nullJurisdiction(6, "township"),
 
-    township: showTownship && township ? {
-      level: 6,
-      type: "township",
-      name: toTitleCase(township),
-      id: null,
-      id_type: null,
-      source: "nominatim",
-    } : nullJurisdiction(6, "township"),
+      suburb: suburb ? {
+        level: 7, type: "suburb",
+        name: toTitleCase(suburb),
+        id: null, id_type: null, source: "nominatim",
+      } : nullJurisdiction(7, "suburb"),
+    };
 
-    suburb: suburb ? {
-      level: 7,
-      type: "suburb",
-      name: toTitleCase(suburb),
-      id: null,
-      id_type: null,
-      source: "nominatim",
-    } : nullJurisdiction(7, "suburb"),
-  };
+  } catch (err) {
+    // If Nominatim fails return nulls — don't crash
+    console.warn("Nominatim failed:", err.message);
+    return {
+      city:         nullJurisdiction(3, "city"),
+      municipality: nullJurisdiction(4, "municipality"),
+      borough:      nullJurisdiction(5, "borough"),
+      township:     nullJurisdiction(6, "township"),
+      suburb:       nullJurisdiction(7, "suburb"),
+    };
+  }
 }
 
 function toTitleCase(str) {
